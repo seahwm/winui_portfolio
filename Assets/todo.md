@@ -1,0 +1,17 @@
+- [X] Home page chg to actual data (top metrics connected)
+- [ ] Dashboard support selecting specific snapshot (currently using latest snapshot)
+- [ ] Dashboard dummy sections:
+    - [X] 年度资产变化趋势 (Yearly Asset Trends) 折线图使用真实快照历史数据
+    - [X] 资产分布剖析（股票市场分布、个股持仓分布、股票类型风格）饼图使用真实持仓数据
+    - [ ] SnapshotService 计算方法实现 (Stock Assets, Liquidity Assets, Retirement Asset)
+- [ ] Dirty Data checking
+    - [X] Asset Type
+    - [X] snapshot
+    - [X] stock data
+- [X] Stock Data screen
+- [X] field hidden based on asset type
+- [X] Edit asset type name
+- [ ] Delete confirm
+    - [X] Asset Type
+    - [X] snapshot
+    - [ ] stock data

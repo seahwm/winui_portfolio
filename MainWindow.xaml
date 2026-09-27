@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="winui_portfolio.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:winui_portfolio"
+    xmlns:views="using:winui_portfolio.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="winui_portfolio">
+
+    <Window.SystemBackdrop >
+        <MicaBackdrop Kind="BaseAlt"/>
+    </Window.SystemBackdrop>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <!--Title Bar-->
+            <RowDefinition Height="Auto" />
+            <!--App Content-->
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TitleBar x:Name="AppTitleBar"
+                  IsBackButtonVisible="False"
+              Title="资产管理">
+            <TitleBar.IconSource>
+                <FontIconSource Glyph="&#xE825;"/>
+            </TitleBar.IconSource>
+        </TitleBar>
+        <NavigationView IsSettingsVisible="False" IsBackButtonVisible="Collapsed" x:Name="nvSample" ItemInvoked="nvSample_ItemInvoked" Grid.Row="1">
+            <NavigationView.MenuItems >
+                <NavigationViewItem Icon="Home" Content="总览" Tag="dashboard" />
+                <NavigationViewItem Icon="AllApps" Content="资产管理" Tag="snapshot" />
+                <NavigationViewItem Icon="Tag" Content="资产类型" Tag="assetType" />
+                <NavigationViewItem Icon="Bullets" Content="股票类型" Tag="stockType" />
+            </NavigationView.MenuItems>
+            <Frame x:Name="contentFrame" SourcePageType="views:Dashboard"/>
+        </NavigationView>
+    </Grid>
+</Window>

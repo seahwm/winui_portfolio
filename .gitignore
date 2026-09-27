@@ -1,0 +1,43 @@
+## Visual Studio & .NET / WinUI 3 .gitignore
+
+# IDE & Editor files
+.vs/
+.vscode/
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Aa]pp[Pp]ackages/
+[Bb]undle[Aa]rtifacts/
+Package.StoreAssociation.xml
+_pkginfo.txt
+Generated\ Files/
+Generated Files/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.pubxml.user
+
+# Local runtime data
+data/
+*.log
+
+# Build configurations & intermediate files
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+*.ipch
+*.aps
+*.pch
+*.pdb
+*.tlog
+*.idb
+*.VC.db
+*.VC.opendb

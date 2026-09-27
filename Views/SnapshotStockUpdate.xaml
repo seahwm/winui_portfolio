@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="winui_portfolio.Views.SnapshotStockUpdate"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:winui_portfolio.Views"
+    xmlns:models="using:winui_portfolio.Models"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid ColumnDefinitions="2*,3*">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Top Bar: Back Button + Asset & Date Info + Actions -->
+        <Grid Grid.ColumnSpan="2" Grid.Row="0" Margin="12,10,12,10" ColumnDefinitions="Auto,*,Auto">
+            <!-- Back Button & Info -->
+            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <Button x:Name="BackButton"
+                        Click="BackButton_Click"
+                        ToolTipService.ToolTip="返回资产快照更新"
+                        Padding="8,6">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="&#xE72B;" FontSize="14" />
+                        <TextBlock Text="返回" FontSize="13" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Border Width="1" Height="20" Background="{ThemeResource DividerStrokeColorDefaultBrush}" Margin="2,0"/>
+
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <FontIcon Glyph="&#xE9D2;" FontSize="16" Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"/>
+                    <TextBlock x:Name="AssetTitleTextBlock" Text="股票持仓详情" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <Border x:Name="StockCountBadge" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="8,2" VerticalAlignment="Center">
+                        <TextBlock x:Name="StockCountTextBlock" Text="0 只股票" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                    </Border>
+                    <TextBlock x:Name="DateTextBlock" Text="" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Header Actions -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                <Button Style="{StaticResource AccentButtonStyle}" Click="SaveSnapshot_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE74E;" />
+                        <TextBlock Text="保存快照" />
+                    </StackPanel>
+                </Button>
+                <Button Click="AddStock_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE710;" />
+                        <TextBlock Text="添加股票" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Left: Summary Card + Stock List -->
+        <Grid Grid.Row="1" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- 资金与闲置现金概览卡片 -->
+            <Border Grid.Row="0"
+                    Margin="10,0,10,10"
+                    Padding="14,10"
+                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                <Grid RowSpacing="6">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- 第一行: 账户总资金 & 股票总市值 -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Spacing="2">
+                            <TextBlock Text="账户总资金 (MYR)" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            <TextBlock x:Name="AccountTotalValueTextBlock" Text="RM 0.00" FontSize="14" FontWeight="SemiBold"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="2" HorizontalAlignment="Right">
+                            <TextBlock Text="股票总市值 (MYR)" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Right"/>
+                            <TextBlock x:Name="StocksTotalValueTextBlock" Text="RM 0.00" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- 分割线 -->
+                    <Border Grid.Row="1" Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" Margin="0,2"/>
+
+                    <!-- 第二行: 闲置现金 & 现金占比 -->
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Spacing="2">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="闲置现金" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <TextBlock x:Name="UsdRateHintTextBlock" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock x:Name="IdleCashValueTextBlock" Text="RM 0.00" FontSize="15" FontWeight="Bold"/>
+                        </StackPanel>
+
+                        <Border Grid.Column="1" x:Name="CashRatioBadge" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="12" Padding="8,4" VerticalAlignment="Center">
+                            <TextBlock x:Name="CashRatioTextBlock" Text="占比 0.0%" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Stock List -->
+            <ListBox Grid.Row="1" x:Name="StockListBox" ItemsSource="{x:Bind stocks, Mode=OneWay}" SelectionChanged="StockListBox_SelectionChanged">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Padding" Value="10,8"/>
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="models:Stock">
+                    <Grid ColumnSpacing="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Icon / Symbol Badge -->
+                        <Border Grid.Column="0" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,4" VerticalAlignment="Center" MinWidth="44" HorizontalAlignment="Center">
+                            <TextBlock Text="{x:Bind Symbol}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentAAFillColorDefaultBrush}" HorizontalAlignment="Center"/>
+                        </Border>
+
+                        <!-- Name & StockType/Units/Weight -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                            <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="{x:Bind StockType}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Text="•" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
+                                <TextBlock Text="{x:Bind Units}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <TextBlock Text="股" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <TextBlock Text="•" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
+                                <TextBlock Text="{x:Bind local:SnapshotStockUpdate.GetStockWeightText(Units, CurrentPrice, Currency)}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"/>
+                            </StackPanel>
+                            <TextBlock Text="{x:Bind Remark}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" Visibility="{x:Bind local:SnapshotStockUpdate.GetRemarkVisibility(Remark), Mode=OneWay}"/>
+                        </StackPanel>
+
+                        <!-- Prices & Profit/Loss Amount -->
+                        <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Spacing="2">
+                            <!-- 现价与均价 -->
+                            <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right">
+                                <TextBlock Text="现:" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind Currency}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind local:SnapshotStockUpdate.FormatCurrency(CurrentPrice)}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Text="•" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Text="均:" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind local:SnapshotStockUpdate.FormatCurrency(AvgPrice)}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- 盈亏金额与百分比 -->
+                            <TextBlock Text="{x:Bind local:SnapshotStockUpdate.GetProfitLossAmountAndRateText(ProfitLoss, ProfitLossRate, Currency)}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="{x:Bind local:SnapshotStockUpdate.GetProfitLossRateBrush(AvgPrice, CurrentPrice)}"
+                                       HorizontalAlignment="Right"/>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        </Grid>
+
+        <!-- Right: Detail Frame -->
+        <Frame x:Name="DetailFrame" Grid.Row="1" Grid.Column="1"/>
+    </Grid>
+</Page>

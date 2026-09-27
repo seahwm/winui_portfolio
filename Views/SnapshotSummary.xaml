@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="winui_portfolio.Views.SnapshotSummary"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:winui_portfolio.Views"
+    xmlns:models="using:winui_portfolio.Models"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer Padding="20,16,20,20" VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="20" MaxWidth="1000" HorizontalAlignment="Stretch">
+            
+            <!-- Page Header -->
+            <StackPanel Spacing="4">
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <FontIcon Glyph="&#xE787;" FontSize="18" Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"/>
+                    <TextBlock Text="Snapshot Summary" FontSize="20" FontWeight="Bold" Style="{StaticResource TitleTextBlockStyle}"/>
+                </StackPanel>
+                <TextBlock FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                    <Run Text="记录日期："/>
+                    <Run Text="{x:Bind snapshot.Date.ToLongDateString(), Mode=OneWay}"/>
+                </TextBlock>
+            </StackPanel>
+
+            <!-- KPI Cards Grid (2x2 Layout) -->
+            <Grid ColumnSpacing="12" RowSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Row 0, Col 0: 1. 总资产 (Total Assets) -->
+                <Border Grid.Row="0" Grid.Column="0" 
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" 
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="10" 
+                        Padding="14">
+                    <StackPanel Spacing="10">
+                        <Grid>
+                            <TextBlock Text="总资产" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <Border Width="30" Height="30" CornerRadius="15" Background="#1A0078D4" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xEC32;" FontSize="14" Foreground="#0078D4"/>
+                            </Border>
+                        </Grid>
+                        <TextBlock x:Name="TotalAssetsTextBlock" Text="RM 0.00" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Row 0, Col 1: 2. 总债务 (Total Liabilities) -->
+                <Border Grid.Row="0" Grid.Column="1" 
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" 
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="10" 
+                        Padding="14">
+                    <StackPanel Spacing="10">
+                        <Grid>
+                            <TextBlock Text="总债务" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <Border Width="30" Height="30" CornerRadius="15" Background="#1AE81123" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xE8C0;" FontSize="14" Foreground="#E81123"/>
+                            </Border>
+                        </Grid>
+                        <TextBlock x:Name="TotalLiabilitiesTextBlock" Text="RM 0.00" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Row 1, Col 0: 3. 净资产 (Net Assets) -->
+                <Border Grid.Row="1" Grid.Column="0" 
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" 
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="10" 
+                        Padding="14">
+                    <StackPanel Spacing="10">
+                        <Grid>
+                            <TextBlock Text="净资产" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <Border Width="30" Height="30" CornerRadius="15" Background="#1A107C41" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xE825;" FontSize="14" Foreground="#107C41"/>
+                            </Border>
+                        </Grid>
+                        <TextBlock x:Name="NetAssetsTextBlock" Text="RM 0.00" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Row 1, Col 1: 4. 股票收益 (Stock Returns: 赚 / 亏) -->
+                <Border Grid.Row="1" Grid.Column="1" 
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" 
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="10" 
+                        Padding="14">
+                    <StackPanel Spacing="10">
+                        <Grid>
+                            <TextBlock Text="股票收益" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <!-- 赚 / 亏 状态图标和徽章 -->
+                            <Border x:Name="StockReturnBadgeBorder" CornerRadius="10" Padding="8,3" Background="#1A107C41" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                    <FontIcon x:Name="StockReturnIcon" Glyph="&#xE9D2;" FontSize="10" Foreground="#107C41"/>
+                                    <TextBlock x:Name="StockReturnStatusTextBlock" Text="赚" FontSize="11" FontWeight="Bold" Foreground="#107C41"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                        <TextBlock x:Name="StockReturnsTextBlock" Text="+RM 0.00" FontSize="18" FontWeight="Bold" Foreground="#107C41" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Bottom Right Action Buttons (Delete & Update) -->
+            <StackPanel Orientation="Horizontal"
+                        Spacing="8"
+                        HorizontalAlignment="Right"
+                        Margin="0,8,0,0">
+                <Button x:Name="DeleteButton"
+                        Click="DeleteButton_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE74D;" />
+                        <TextBlock Text="删除" />
+                    </StackPanel>
+                </Button>
+                <Button x:Name="UpdateButton"
+                        Style="{StaticResource AccentButtonStyle}"
+                        Click="UpdateButton_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE70F;" />
+                        <TextBlock Text="更新" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>
