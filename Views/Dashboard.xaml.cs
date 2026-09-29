@@ -86,12 +86,19 @@ namespace winui_portfolio.Views
                 return;
             }
 
-            TotalAssetsTextBlock.Text = $"RM {SnapshotService.CalculateTotalWorth(latestSnapshot):N2}";
+            decimal totalWorth = SnapshotService.CalculateTotalWorth(latestSnapshot);
+            TotalAssetsTextBlock.Text = $"RM {totalWorth:N2}";
             TotalDebtTextBlock.Text = $"RM {SnapshotService.CalculateTotalLiability(latestSnapshot):N2}";
             NetWorthTextBlock.Text = $"RM {SnapshotService.CalculateTotalNetWorth(latestSnapshot):N2}";
 
             decimal stockAssets = SnapshotService.CalculateStockAssets(latestSnapshot);
             StockAssetsTextBlock.Text = $"RM {stockAssets:N2}";
+            if (StockAssetsRatioTextBlock != null)
+            {
+                StockAssetsRatioTextBlock.Text = totalWorth > 0
+                    ? $"占总资产 {(stockAssets / totalWorth):P1}"
+                    : "占总资产 0.0%";
+            }
 
             decimal stockReturn = SnapshotService.CalculateStockReturn(latestSnapshot);
             if (stockReturn >= 0)
@@ -104,6 +111,25 @@ namespace winui_portfolio.Views
                 StockReturnsTextBlock.Text = $"-RM {Math.Abs(stockReturn):N2}";
                 StockReturnsTextBlock.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 232, 17, 35));
             }
+
+            decimal stockProfitRate = SnapshotService.CalculateStockAssetsProfitRate(latestSnapshot);
+            if (StockReturnsBadgeBorder != null && StockReturnsBadgeTextBlock != null)
+            {
+                string sign = stockProfitRate >= 0 ? "+" : "";
+                StockReturnsBadgeTextBlock.Text = $"{sign}{stockProfitRate:F2}%";
+                StockReturnsBadgeBorder.Visibility = Visibility.Visible;
+                if (stockProfitRate >= 0)
+                {
+                    StockReturnsBadgeBorder.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 230, 244, 234));
+                    StockReturnsBadgeTextBlock.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 16, 124, 65));
+                }
+                else
+                {
+                    StockReturnsBadgeBorder.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 253, 231, 233));
+                    StockReturnsBadgeTextBlock.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 232, 17, 35));
+                }
+            }
+
             LiquidityWithoutDebtTextBlock.Text = $"RM {SnapshotService.CalculateLiquidityAssetWithoutDebt(latestSnapshot):N2}";
             LiquidityWithoutParentsWithoutDebtTextBlock.Text = $"RM {SnapshotService.CalculateLiquidityAssetWithoutParentsWithoutDebt(latestSnapshot):N2}";
             RetirementAssetTextBlock.Text = $"RM {SnapshotService.CalculateRetirementAsset(latestSnapshot):N2}";
@@ -143,6 +169,7 @@ namespace winui_portfolio.Views
             string seriesName = "净资产 (Net Worth)";
             SKColor strokeColor = SKColor.Parse("#0078D4");
             SKColor fillColor = SKColor.Parse("#1A0078D4");
+            bool isPercentage = false;
 
             switch (selectedIndex)
             {
@@ -150,6 +177,7 @@ namespace winui_portfolio.Views
                     seriesName = "净资产 (Net Worth)";
                     strokeColor = SKColor.Parse("#0078D4");
                     fillColor = SKColor.Parse("#1A0078D4");
+                    isPercentage = false;
                     foreach (var snapshot in snapshots)
                     {
                         labels.Add(snapshot.Date.ToShortDateString());
@@ -161,6 +189,7 @@ namespace winui_portfolio.Views
                     seriesName = "股票资产 (Stock Assets)";
                     strokeColor = SKColor.Parse("#5C2D91");
                     fillColor = SKColor.Parse("#1A5C2D91");
+                    isPercentage = false;
                     foreach (var snapshot in snapshots)
                     {
                         labels.Add(snapshot.Date.ToShortDateString());
@@ -172,10 +201,47 @@ namespace winui_portfolio.Views
                     seriesName = "流动资产 (无父母/无债务)";
                     strokeColor = SKColor.Parse("#008272");
                     fillColor = SKColor.Parse("#1A008272");
+                    isPercentage = false;
                     foreach (var snapshot in snapshots)
                     {
                         labels.Add(snapshot.Date.ToShortDateString());
                         values.Add((double)SnapshotService.CalculateLiquidityAssetWithoutParentsWithoutDebt(snapshot));
+                    }
+                    break;
+
+                case 3: // 股票收益率 (Stock Return Rate)
+                    seriesName = "股票收益率 (Stock Return Rate)";
+                    strokeColor = SKColor.Parse("#107C41");
+                    fillColor = SKColor.Parse("#1A107C41");
+                    isPercentage = true;
+                    foreach (var snapshot in snapshots)
+                    {
+                        labels.Add(snapshot.Date.ToShortDateString());
+                        values.Add((double)SnapshotService.CalculateStockAssetsProfitRate(snapshot));
+                    }
+                    break;
+
+                case 4: // 父母投资资产 (Parents Investment Assets)
+                    seriesName = "父母投资资产 (Parents Investment Assets)";
+                    strokeColor = SKColor.Parse("#CA5010");
+                    fillColor = SKColor.Parse("#1ACA5010");
+                    isPercentage = false;
+                    foreach (var snapshot in snapshots)
+                    {
+                        labels.Add(snapshot.Date.ToShortDateString());
+                        values.Add((double)SnapshotService.CalculateParentalInvestment(snapshot));
+                    }
+                    break;
+
+                case 5: // 父母投资收益率 (Parents Return Rate)
+                    seriesName = "父母投资收益率 (Parents Return Rate)";
+                    strokeColor = SKColor.Parse("#D13438");
+                    fillColor = SKColor.Parse("#1AD13438");
+                    isPercentage = true;
+                    foreach (var snapshot in snapshots)
+                    {
+                        labels.Add(snapshot.Date.ToShortDateString());
+                        values.Add((double)SnapshotService.CalculateParentalInvestmentProfitRate(snapshot));
                     }
                     break;
             }
@@ -187,9 +253,12 @@ namespace winui_portfolio.Views
                     Name = seriesName,
                     Values = values,
                     Stroke = new SolidColorPaint(strokeColor) { StrokeThickness = 3 },
-                    Fill = new SolidColorPaint(fillColor),
+                    Fill = isPercentage ? null : new SolidColorPaint(fillColor),
                     GeometrySize = 7,
-                    LineSmoothness = 0.5
+                    LineSmoothness = 0.5,
+                    YToolTipLabelFormatter = point => isPercentage
+                        ? $"{point.Coordinate.PrimaryValue:F2}%"
+                        : $"RM {point.Coordinate.PrimaryValue:N2}"
                 }
             };
 
@@ -206,7 +275,7 @@ namespace winui_portfolio.Views
             {
                 new Axis
                 {
-                    Labeler = value => "RM " + value.ToString("N2"),
+                    Labeler = value => isPercentage ? $"{value:0.##}%" : "RM " + value.ToString("N2"),
                     LabelsPaint = new SolidColorPaint(SKColors.Gray)
                 }
             };

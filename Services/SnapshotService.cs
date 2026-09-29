@@ -9,8 +9,16 @@ namespace winui_portfolio.Services
 {
     public static class SnapshotService
     {
+        private static decimal ConvertToMyr(decimal amount, string? currency, decimal usdRate)
+        {
+            if (string.Equals(currency, "USD", StringComparison.OrdinalIgnoreCase))
+            {
+                return amount * (usdRate > 0 ? usdRate : 1m);
+            }
+            return amount;
+        }
 
-        public static Decimal CalculateStockReturn(Snapshot snapshot)
+        public static Decimal CalculateStockReturn(Snapshot? snapshot)
         {
             if (snapshot == null)
             {
@@ -20,17 +28,16 @@ namespace winui_portfolio.Services
             Decimal totalValue = Decimal.Zero;
             foreach (var asset in snapshot.Assets)
             {
-                if (asset.AssetType.Name.Equals("股票"))
+                if (asset.AssetType != null && asset.AssetType.Name.Equals("股票"))
                 {
-                    totalCost += asset.Cost;
-                    totalValue += asset.Value;
+                    totalCost += ConvertToMyr(asset.Cost, asset.Currency, snapshot.UsdRate);
+                    totalValue += ConvertToMyr(asset.Value, asset.Currency, snapshot.UsdRate);
                 }
-
             }
             return totalValue - totalCost;
         }
 
-        public static Decimal CalculateTotalWorth(Snapshot snapshot)
+        public static Decimal CalculateTotalWorth(Snapshot? snapshot)
         {
             if (snapshot == null)
             {
@@ -39,35 +46,26 @@ namespace winui_portfolio.Services
             Decimal totalWorth = Decimal.Zero;
             foreach (var asset in snapshot.Assets)
             {
-                if (asset.AssetType.IsDebt)
+                if (asset.AssetType != null && asset.AssetType.IsDebt)
                 {
                     continue;
                 }
-                if (asset.Currency.Equals("USD"))
-                {
-                    totalWorth += asset.Value * snapshot.UsdRate;
-
-                }
-                else
-                {
-                    totalWorth += asset.Value;
-                }
+                totalWorth += ConvertToMyr(asset.Value, asset.Currency, snapshot.UsdRate);
             }
             return totalWorth;
         }
 
-        public static Decimal CalculateTotalNetWorth(Snapshot snapshot)
+        public static Decimal CalculateTotalNetWorth(Snapshot? snapshot)
         {
             if (snapshot == null)
             {
                 return Decimal.Zero;
             }
             Decimal totalNetWorth = CalculateTotalWorth(snapshot) - CalculateTotalLiability(snapshot);
-
             return totalNetWorth;
         }
 
-        public static Decimal CalculateTotalLiability(Snapshot snapshot)
+        public static Decimal CalculateTotalLiability(Snapshot? snapshot)
         {
             if (snapshot == null)
             {
@@ -76,9 +74,9 @@ namespace winui_portfolio.Services
             Decimal totalLiability = Decimal.Zero;
             foreach (var asset in snapshot.Assets)
             {
-                if (asset.AssetType.IsDebt)
+                if (asset.AssetType != null && asset.AssetType.IsDebt)
                 {
-                    totalLiability += asset.Value;
+                    totalLiability += ConvertToMyr(asset.Value, asset.Currency, snapshot.UsdRate);
                 }
             }
             return totalLiability;
@@ -91,17 +89,36 @@ namespace winui_portfolio.Services
                 return Decimal.Zero;
             }
             var assets = snapshot.Assets;
-
             Decimal stockAsset = Decimal.Zero;
-
             foreach (var asset in assets)
             {
-                if (asset.AssetType.Name.Equals("股票"))
+                if (asset.AssetType != null && asset.AssetType.Name.Equals("股票"))
                 {
-                    stockAsset += asset.Value;
+                    stockAsset += ConvertToMyr(asset.Value, asset.Currency, snapshot.UsdRate);
                 }
             }
             return stockAsset;
+        }
+
+        public static Decimal CalculateStockAssetsProfitRate(Snapshot? snapshot)
+        {
+            if (snapshot == null)
+            {
+                return Decimal.Zero;
+            }
+            var assets = snapshot.Assets;
+
+            Decimal stockAsset = Decimal.Zero;
+            Decimal stockCost = Decimal.Zero;
+            foreach (var asset in assets)
+            {
+                if (asset.AssetType != null && asset.AssetType.Name.Equals("股票"))
+                {
+                    stockAsset += ConvertToMyr(asset.Value, asset.Currency, snapshot.UsdRate);
+                    stockCost += ConvertToMyr(asset.Cost, asset.Currency, snapshot.UsdRate);
+                }
+            }
+            return stockCost > 0 ? (stockAsset - stockCost) / stockCost * 100 : Decimal.Zero;
         }
 
         public static Decimal CalculateLiquidityAssetWithoutDebt(Snapshot? snapshot)
@@ -115,9 +132,10 @@ namespace winui_portfolio.Services
 
             foreach (var asset in snapshot.Assets)
             {
-                if (!asset.AssetType.IsRetirement)
+                if (asset.AssetType != null && !asset.AssetType.IsRetirement)
                 {
-                    Decimal val = asset.AssetType.IsDebt ? -asset.Value : asset.Value;
+                    Decimal converted = ConvertToMyr(asset.Value, asset.Currency, snapshot.UsdRate);
+                    Decimal val = asset.AssetType.IsDebt ? -converted : converted;
                     liquidAsset += val;
                 }
             }
@@ -135,16 +153,52 @@ namespace winui_portfolio.Services
 
             foreach (var asset in snapshot.Assets)
             {
-                if (!asset.AssetType.IsRetirement && !asset.AssetType.IsParent)
+                if (asset.AssetType != null && !asset.AssetType.IsRetirement && !asset.AssetType.IsParent)
                 {
-                    Decimal val = asset.AssetType.IsDebt ? -asset.Value : asset.Value;
+                    Decimal converted = ConvertToMyr(asset.Value, asset.Currency, snapshot.UsdRate);
+                    Decimal val = asset.AssetType.IsDebt ? -converted : converted;
                     rsl += val;
                 }
             }
             return rsl;
         }
 
-        // Dummy method: 请在此实现退休资产计算逻辑
+        public static Decimal CalculateParentalInvestmentProfitRate(Snapshot? snapshot)
+        {
+            if (snapshot == null)
+            {
+                return Decimal.Zero;
+            }
+            Decimal rsl = Decimal.Zero;
+            Decimal cost = Decimal.Zero;
+            foreach (var asset in snapshot.Assets)
+            {
+                if (asset.AssetType != null && !asset.AssetType.IsRetirement && asset.AssetType.IsParent)
+                {
+                    rsl += ConvertToMyr(asset.Value, asset.Currency, snapshot.UsdRate);
+                    cost += ConvertToMyr(asset.Cost, asset.Currency, snapshot.UsdRate);
+                }
+            }
+            return cost > 0 ? (rsl - cost) / cost * 100 : Decimal.Zero;
+        }
+
+        public static Decimal CalculateParentalInvestment(Snapshot? snapshot)
+        {
+            if (snapshot == null)
+            {
+                return Decimal.Zero;
+            }
+            Decimal rsl = Decimal.Zero;
+            foreach (var asset in snapshot.Assets)
+            {
+                if (asset.AssetType != null && !asset.AssetType.IsRetirement && asset.AssetType.IsParent)
+                {
+                    rsl += ConvertToMyr(asset.Value, asset.Currency, snapshot.UsdRate);
+                }
+            }
+            return rsl;
+        }
+
         public static Decimal CalculateRetirementAsset(Snapshot? snapshot)
         {
             if (snapshot == null)
@@ -156,9 +210,9 @@ namespace winui_portfolio.Services
 
             foreach (var asset in snapshot.Assets)
             {
-                if (asset.AssetType.IsRetirement)
+                if (asset.AssetType != null && asset.AssetType.IsRetirement)
                 {
-                    rsl += asset.Value;
+                    rsl += ConvertToMyr(asset.Value, asset.Currency, snapshot.UsdRate);
                 }
             }
             return rsl;

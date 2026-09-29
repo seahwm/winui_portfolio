@@ -158,10 +158,13 @@
                             <TextBlock FontSize="16" FontWeight="SemiBold" Text="年度资产变化趋势 (Yearly Asset Trends)" />
                             <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="历史资产复合增长表现" />
                         </StackPanel>
-                        <ComboBox x:Name="AssetTrendComboBox" Grid.Column="1" HorizontalAlignment="Right" MinWidth="180" SelectedIndex="0" SelectionChanged="AssetTrendComboBox_SelectionChanged">
+                        <ComboBox x:Name="AssetTrendComboBox" Grid.Column="1" HorizontalAlignment="Right" MinWidth="220" SelectedIndex="0" SelectionChanged="AssetTrendComboBox_SelectionChanged">
                             <ComboBoxItem Content="净资产 (Net Worth)" />
                             <ComboBoxItem Content="股票资产 (Stock Assets)" />
                             <ComboBoxItem Content="流动资产 (无父母/无债务)" />
+                            <ComboBoxItem Content="股票收益率 (Stock Return Rate)" />
+                            <ComboBoxItem Content="父母投资资产 (Parents Investment Assets)" />
+                            <ComboBoxItem Content="父母投资收益率 (Parents Return Rate)" />
                         </ComboBox>
                     </Grid>
                     <!-- LiveCharts 折线图控件 -->
