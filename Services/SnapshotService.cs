@@ -199,6 +199,25 @@ namespace winui_portfolio.Services
             return rsl;
         }
 
+        public static Decimal CalculateParentalInvestmentReturn(Snapshot? snapshot)
+        {
+            if (snapshot == null)
+            {
+                return Decimal.Zero;
+            }
+            Decimal rsl = Decimal.Zero;
+            Decimal cost = Decimal.Zero;
+            foreach (var asset in snapshot.Assets)
+            {
+                if (asset.AssetType != null && !asset.AssetType.IsRetirement && asset.AssetType.IsParent)
+                {
+                    rsl += ConvertToMyr(asset.Value, asset.Currency, snapshot.UsdRate);
+                    cost += ConvertToMyr(asset.Cost, asset.Currency, snapshot.UsdRate);
+                }
+            }
+            return rsl - cost;
+        }
+
         public static Decimal CalculateRetirementAsset(Snapshot? snapshot)
         {
             if (snapshot == null)

@@ -140,6 +140,11 @@ namespace winui_portfolio.Views
             UpdateLineChart();
         }
 
+        private void ShowDataLabelsToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateLineChart();
+        }
+
         private void UpdateLineChart()
         {
             if (AssetHistoryChart == null)
@@ -159,6 +164,7 @@ namespace winui_portfolio.Views
 
             var values = new List<double>();
             var labels = new List<string>();
+            var tooltipLabels = new List<string>();
 
             int selectedIndex = AssetTrendComboBox?.SelectedIndex ?? 0;
             if (selectedIndex < 0)
@@ -181,7 +187,9 @@ namespace winui_portfolio.Views
                     foreach (var snapshot in snapshots)
                     {
                         labels.Add(snapshot.Date.ToShortDateString());
-                        values.Add((double)SnapshotService.CalculateTotalNetWorth(snapshot));
+                        var val = (double)SnapshotService.CalculateTotalNetWorth(snapshot);
+                        values.Add(val);
+                        tooltipLabels.Add($"RM {val:N2}");
                     }
                     break;
 
@@ -193,7 +201,9 @@ namespace winui_portfolio.Views
                     foreach (var snapshot in snapshots)
                     {
                         labels.Add(snapshot.Date.ToShortDateString());
-                        values.Add((double)SnapshotService.CalculateStockAssets(snapshot));
+                        var val = (double)SnapshotService.CalculateStockAssets(snapshot);
+                        values.Add(val);
+                        tooltipLabels.Add($"RM {val:N2}");
                     }
                     break;
 
@@ -205,7 +215,9 @@ namespace winui_portfolio.Views
                     foreach (var snapshot in snapshots)
                     {
                         labels.Add(snapshot.Date.ToShortDateString());
-                        values.Add((double)SnapshotService.CalculateLiquidityAssetWithoutParentsWithoutDebt(snapshot));
+                        var val = (double)SnapshotService.CalculateLiquidityAssetWithoutParentsWithoutDebt(snapshot);
+                        values.Add(val);
+                        tooltipLabels.Add($"RM {val:N2}");
                     }
                     break;
 
@@ -217,7 +229,18 @@ namespace winui_portfolio.Views
                     foreach (var snapshot in snapshots)
                     {
                         labels.Add(snapshot.Date.ToShortDateString());
-                        values.Add((double)SnapshotService.CalculateStockAssetsProfitRate(snapshot));
+                        decimal rate = SnapshotService.CalculateStockAssetsProfitRate(snapshot);
+                        decimal ret = SnapshotService.CalculateStockReturn(snapshot);
+                        values.Add((double)rate);
+
+                        string rateStr = rate >= 0 ? $"+{rate:F2}%" : $"{rate:F2}%";
+                        string retStr = ret switch
+                        {
+                            > 0 => $"+RM {ret:N2}",
+                            < 0 => $"-RM {Math.Abs(ret):N2}",
+                            _ => "RM 0.00"
+                        };
+                        tooltipLabels.Add($"{rateStr} ({retStr})");
                     }
                     break;
 
@@ -229,7 +252,9 @@ namespace winui_portfolio.Views
                     foreach (var snapshot in snapshots)
                     {
                         labels.Add(snapshot.Date.ToShortDateString());
-                        values.Add((double)SnapshotService.CalculateParentalInvestment(snapshot));
+                        var val = (double)SnapshotService.CalculateParentalInvestment(snapshot);
+                        values.Add(val);
+                        tooltipLabels.Add($"RM {val:N2}");
                     }
                     break;
 
@@ -241,10 +266,25 @@ namespace winui_portfolio.Views
                     foreach (var snapshot in snapshots)
                     {
                         labels.Add(snapshot.Date.ToShortDateString());
-                        values.Add((double)SnapshotService.CalculateParentalInvestmentProfitRate(snapshot));
+                        decimal rate = SnapshotService.CalculateParentalInvestmentProfitRate(snapshot);
+                        decimal ret = SnapshotService.CalculateParentalInvestmentReturn(snapshot);
+                        values.Add((double)rate);
+
+                        string rateStr = rate >= 0 ? $"+{rate:F2}%" : $"{rate:F2}%";
+                        string retStr = ret switch
+                        {
+                            > 0 => $"+RM {ret:N2}",
+                            < 0 => $"-RM {Math.Abs(ret):N2}",
+                            _ => "RM 0.00"
+                        };
+                        tooltipLabels.Add($"{rateStr} ({retStr})");
                     }
                     break;
             }
+
+            bool showDataLabels = ShowDataLabelsToggleButton?.IsChecked == true;
+            bool isDark = this.ActualTheme == ElementTheme.Dark;
+            SKColor labelColor = isDark ? SKColor.Parse("#E0E0E0") : SKColor.Parse("#202020");
 
             AssetHistoryChart.Series = new ISeries[]
             {
@@ -256,9 +296,29 @@ namespace winui_portfolio.Views
                     Fill = isPercentage ? null : new SolidColorPaint(fillColor),
                     GeometrySize = 7,
                     LineSmoothness = 0.5,
-                    YToolTipLabelFormatter = point => isPercentage
-                        ? $"{point.Coordinate.PrimaryValue:F2}%"
-                        : $"RM {point.Coordinate.PrimaryValue:N2}"
+                    DataLabelsPaint = showDataLabels ? new SolidColorPaint(labelColor) : null,
+                    DataLabelsSize = 11,
+                    DataLabelsPosition = DataLabelsPosition.Top,
+                    DataLabelsFormatter = point =>
+                    {
+                        if (point.Index >= 0 && point.Index < tooltipLabels.Count)
+                        {
+                            return tooltipLabels[point.Index];
+                        }
+                        return isPercentage
+                            ? $"{point.Coordinate.PrimaryValue:F2}%"
+                            : $"RM {point.Coordinate.PrimaryValue:N2}";
+                    },
+                    YToolTipLabelFormatter = point =>
+                    {
+                        if (point.Index >= 0 && point.Index < tooltipLabels.Count)
+                        {
+                            return tooltipLabels[point.Index];
+                        }
+                        return isPercentage
+                            ? $"{point.Coordinate.PrimaryValue:F2}%"
+                            : $"RM {point.Coordinate.PrimaryValue:N2}";
+                    }
                 }
             };
 

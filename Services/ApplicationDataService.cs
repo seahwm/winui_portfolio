@@ -31,7 +31,7 @@ namespace winui_portfolio.Services
 
         private static string DATA_FOLDER_PATH = "./data";
 
-        private static string DATA_FILE_PATH = "E:\\___workspace\\______________note\\financial json" + "\\data.json";
+        private static string DATA_FILE_PATH = DATA_FOLDER_PATH + "/data.json";
         static ApplicationDataService()
         {
             LoadJsonData();
