@@ -42,6 +42,10 @@ namespace winui_portfolio.Models
 
         public decimal ProfitLossRate => TotalCost > 0 ? (ProfitLoss / TotalCost) * 100 : Decimal.Zero;
 
+        public decimal TotalProfit => ProfitLoss + AccumulatedProfit;
+
+        public decimal TotalProfitRate => TotalCost > 0 ? (TotalProfit / TotalCost) * 100 : Decimal.Zero;
+
         public Stock()
         {
         }

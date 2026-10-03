@@ -295,8 +295,25 @@ namespace winui_portfolio.Views
 
         public static string GetProfitLossAmountAndRateText(decimal profitLoss, decimal profitLossRate, string currency)
         {
-            string sign = profitLoss > 0 ? "+" : "";
-            return $"{sign}{currency} {profitLoss:N2} ({sign}{profitLossRate:F2}%)";
+            if (profitLoss > 0)
+            {
+                return $"+{currency} {profitLoss:N2} (+{profitLossRate:F2}%)";
+            }
+            else if (profitLoss < 0)
+            {
+                return $"-{currency} {Math.Abs(profitLoss):N2} ({profitLossRate:F2}%)";
+            }
+            else
+            {
+                return $"{currency} 0.00 (0.00%)";
+            }
+        }
+
+        public static SolidColorBrush GetAmountBrush(decimal amount)
+        {
+            if (amount > 0) return ProfitBrush;
+            if (amount < 0) return LossBrush;
+            return NeutralBrush;
         }
 
         public static string GetProfitLossRateText(decimal cost, decimal value)
@@ -319,6 +336,11 @@ namespace winui_portfolio.Views
         public static Visibility GetRemarkVisibility(string? remark)
         {
             return string.IsNullOrWhiteSpace(remark) ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        public static Visibility GetAccumulatedProfitVisibility(decimal accumulatedProfit)
+        {
+            return accumulatedProfit != 0m ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 
