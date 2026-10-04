@@ -35,13 +35,14 @@ namespace winui_portfolio.Views
         /// </summary>
         public void UpdateSummaryValues()
         {
-            Decimal stockReturns = Decimal.Zero;
             TotalAssetsTextBlock.Text = $"RM {SnapshotService.CalculateTotalWorth(snapshot):N2}";
             TotalLiabilitiesTextBlock.Text = $"RM {SnapshotService.CalculateTotalLiability(snapshot):N2}";
             NetAssetsTextBlock.Text = $"RM {SnapshotService.CalculateTotalNetWorth(snapshot):N2}";
 
-            // 股票收益（根据正负数自动适配 赚/亏 样式）
-            UpdateStockReturnUI(SnapshotService.CalculateStockReturn(snapshot));
+            // 股票收益（根据正负数自动适配 赚/亏 样式与收益率）
+            decimal stockReturn = SnapshotService.CalculateStockReturn(snapshot);
+            decimal stockProfitRate = SnapshotService.CalculateStockAssetsProfitRate(snapshot);
+            UpdateStockReturnUI(stockReturn, stockProfitRate);
         }
 
         /// <summary>
@@ -49,26 +50,47 @@ namespace winui_portfolio.Views
         /// </summary>
         public void UpdateStockReturnUI(decimal stockReturns)
         {
+            decimal stockProfitRate = SnapshotService.CalculateStockAssetsProfitRate(snapshot);
+            UpdateStockReturnUI(stockReturns, stockProfitRate);
+        }
+
+        /// <summary>
+        /// 根据股票收益与收益率更新 赚/亏 徽章、百分比与色彩样式
+        /// </summary>
+        public void UpdateStockReturnUI(decimal stockReturns, decimal stockProfitRate)
+        {
+            var profitColor = Windows.UI.Color.FromArgb(255, 16, 124, 65); // #107C41
+            var lossColor = Windows.UI.Color.FromArgb(255, 232, 17, 35);    // #E81123
+
             if (stockReturns >= 0)
             {
                 // 赚 (Profit) - 绿色样式
                 StockReturnsTextBlock.Text = $"+RM {stockReturns:N2}";
-                StockReturnsTextBlock.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 16, 124, 65)); // #107C41
+                StockReturnsTextBlock.Foreground = new SolidColorBrush(profitColor);
+
+                string sign = stockProfitRate > 0 ? "+" : "";
+                StockReturnRateTextBlock.Text = $"({sign}{stockProfitRate:F2}%)";
+                StockReturnRateTextBlock.Foreground = new SolidColorBrush(profitColor);
+
                 StockReturnStatusTextBlock.Text = "赚";
-                StockReturnStatusTextBlock.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 16, 124, 65));
+                StockReturnStatusTextBlock.Foreground = new SolidColorBrush(profitColor);
                 StockReturnIcon.Glyph = "\uE9D2"; // Trending Up 图标
-                StockReturnIcon.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 16, 124, 65));
+                StockReturnIcon.Foreground = new SolidColorBrush(profitColor);
                 StockReturnBadgeBorder.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(26, 16, 124, 65)); // 背景浅绿
             }
             else
             {
                 // 亏 (Loss) - 红色样式
                 StockReturnsTextBlock.Text = $"-RM {Math.Abs(stockReturns):N2}";
-                StockReturnsTextBlock.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 232, 17, 35)); // #E81123
+                StockReturnsTextBlock.Foreground = new SolidColorBrush(lossColor);
+
+                StockReturnRateTextBlock.Text = $"({stockProfitRate:F2}%)";
+                StockReturnRateTextBlock.Foreground = new SolidColorBrush(lossColor);
+
                 StockReturnStatusTextBlock.Text = "亏";
-                StockReturnStatusTextBlock.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 232, 17, 35));
+                StockReturnStatusTextBlock.Foreground = new SolidColorBrush(lossColor);
                 StockReturnIcon.Glyph = "\uE9D9"; // Trending Down 图标
-                StockReturnIcon.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 232, 17, 35));
+                StockReturnIcon.Foreground = new SolidColorBrush(lossColor);
                 StockReturnBadgeBorder.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(26, 232, 17, 35)); // 背景浅红
             }
         }

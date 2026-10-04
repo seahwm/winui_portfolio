@@ -107,7 +107,10 @@
                                 </StackPanel>
                             </Border>
                         </Grid>
-                        <TextBlock x:Name="StockReturnsTextBlock" Text="+RM 0.00" FontSize="18" FontWeight="Bold" Foreground="#107C41" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock x:Name="StockReturnsTextBlock" Text="+RM 0.00" FontSize="18" FontWeight="Bold" Foreground="#107C41" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                            <TextBlock x:Name="StockReturnRateTextBlock" Text="(+0.00%)" FontSize="13" FontWeight="SemiBold" Foreground="#107C41" VerticalAlignment="Center"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </Grid>
